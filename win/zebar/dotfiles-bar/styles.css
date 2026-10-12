@@ -82,7 +82,7 @@ body,
   grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
   height: 100%;
-  padding: 4px 1.5vw;
+  padding: 4px 1.5vw 4px 0;
 }
 
 .left,

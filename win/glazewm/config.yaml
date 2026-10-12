@@ -229,10 +229,6 @@ keybindings:
   - commands: ['toggle-tiling-direction']
     bindings: ['alt+v']
 
-  # Change focus from tiling windows -> floating -> fullscreen.
-  - commands: ['wm-cycle-focus']
-    bindings: ['alt+space']
-
   # Change the focused window to be floating.
   - commands: ['toggle-floating --centered']
     bindings: ['alt+shift+space']
@@ -265,10 +261,8 @@ keybindings:
   - commands: ['wm-redraw']
     bindings: ['alt+shift+w']
 
-  # Launch CMD terminal. Alternatively, use `shell-exec wt` or
-  # `shell-exec %ProgramFiles%/Git/git-bash.exe` to start Windows
-  # Terminal and Git Bash respectively.
-  - commands: ['shell-exec cmd']
+  # Launch PowerShell.
+  - commands: ['shell-exec powershell']
     bindings: ['alt+enter']
 
   # Focus the next/previous active workspace defined in `workspaces` config.
