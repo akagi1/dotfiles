@@ -1,0 +1,15 @@
+#!/bin/sh
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
+sketchybar --bar position=top height=30 color=0xe6100e19 border_width=0 corner_radius=0 shadow=off margin=0 padding_left=8 padding_right=8 display=all topmost=on sticky=on
+sketchybar --default icon.font="Menlo:Regular:12.0" label.font="Menlo:Regular:12.0" icon.color=0xff8293bf label.color=0xffeeeeee padding_left=4 padding_right=4 icon.padding_left=6 icon.padding_right=6 label.padding_left=6 label.padding_right=6 background.corner_radius=2 background.height=22
+for sid in 1 2 3 4 5 6 7 8 9; do
+  sketchybar --add space "space.$sid" left --set "space.$sid" space="$sid" icon="$sid" label.drawing=off background.color=0x804b73ff script="\"$PLUGIN_DIR/space.sh\"" click_script="skhd -k 'ctrl - $sid'" --subscribe "space.$sid" space_change
+done
+# Keep the center clear for MacBook display notches.
+sketchybar --add item clock right --set clock icon.drawing=off update_freq=30 script="\"$PLUGIN_DIR/stats.sh\" clock"
+sketchybar --add item battery right --set battery icon=BAT update_freq=60 script="\"$PLUGIN_DIR/stats.sh\" battery" --subscribe battery power_source_change system_woke
+sketchybar --add item cpu right --set cpu icon=CPU update_freq=10 script="\"$PLUGIN_DIR/stats.sh\" cpu"
+sketchybar --add item memory right --set memory icon=MEM update_freq=15 script="\"$PLUGIN_DIR/stats.sh\" memory"
+sketchybar --add item network right --set network icon=NET update_freq=30 script="\"$PLUGIN_DIR/stats.sh\" network" --subscribe network system_woke
+sketchybar --update
