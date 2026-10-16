@@ -16,6 +16,11 @@
    | `mac/skhd/` | `~/.config/skhd/` |
    | `mac/sketchybar/` | `~/.config/sketchybar/` |
 
+   For the zsh prompt, add `source /path/to/dotfiles/mac/zsh/prompt.zsh`
+   to the end of `~/.zshrc` (using your checkout's absolute path). It shows
+   the Git branch and `+` staged, `!` unstaged, `?` untracked changes with
+   one Git status call per prompt; it skips submodule worktree scans.
+
 3. Grant yabai and skhd **Accessibility** access in System Settings.
 4. Create nine desktops; disable automatic Space rearrangement. Enable
    **Control+1–9** in Keyboard → Keyboard Shortcuts → Mission Control.
