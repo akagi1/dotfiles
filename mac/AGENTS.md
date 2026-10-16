@@ -36,7 +36,9 @@
 
 ## Dotfiles
 
-- BSP tiling, 10pt gaps, 30pt dark bar; built-in Menlo font.
+- BSP tiling, no gaps for a single tiled window, 5pt gaps and padding for
+  multiple tiled windows per space, 30pt dark bar; built-in Menlo font.
+  Smart gaps use `jq` and the adjacent `yabai/smart-gaps.sh` helper.
 - Option + H/J/K/L or arrows: focus; add Shift to move tiles.
 - Option + 1–9: switch desktop; add Shift to move a window and follow.
 - Moving windows between desktops on Sequoia requires the optional

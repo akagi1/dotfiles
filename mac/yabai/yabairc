@@ -9,12 +9,22 @@ yabai -m config mouse_follows_focus off
 yabai -m config mouse_modifier alt
 yabai -m config mouse_action1 move
 yabai -m config mouse_action2 resize
-# 30pt bar + 10pt breathing room; native menu bar/Dock remain macOS settings.
+# Reserve the 30pt bar; smart gaps control the remaining padding.
 yabai -m config external_bar all:30:0
-yabai -m config top_padding 10
-yabai -m config bottom_padding 10
-yabai -m config left_padding 10
-yabai -m config right_padding 10
-yabai -m config window_gap 10
+yabai -m config top_padding 5
+yabai -m config bottom_padding 5
+yabai -m config left_padding 5
+yabai -m config right_padding 5
+yabai -m config window_gap 5
 yabai -m rule --add label=dotfiles-settings app="^System Settings$" manage=off
 yabai -m rule --add label=dotfiles-pip title="^(Picture.in.Picture|Picture in Picture)$" manage=off
+
+config_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+for event in window_created window_destroyed window_minimized window_deminimized \
+    window_focused window_moved window_resized application_hidden application_visible \
+    space_changed space_created display_added display_removed; do
+    yabai -m signal --remove "dotfiles-gaps-$event" 2>/dev/null
+    yabai -m signal --add label="dotfiles-gaps-$event" event="$event" \
+        action="/bin/sh '$config_dir/smart-gaps.sh'"
+done
+/bin/sh "$config_dir/smart-gaps.sh"
