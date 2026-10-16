@@ -1,5 +1,22 @@
 # Windows desktop setup
 
+## PowerShell prompt
+
+Dot-source `win/powershell/prompt.ps1` from your current-user PowerShell
+profile (`$PROFILE.CurrentUserAllHosts`) using your checkout's absolute path:
+
+```powershell
+. 'C:\path\to\dotfiles\win\powershell\prompt.ps1'
+```
+
+Create the profile's parent directory and file if needed. Back up an existing
+profile before editing it. For PowerShell 7, add the same line to its separate
+current-user profile too. Open a new shell, or dot-source the profile to reload.
+The prompt matches `mac/zsh/prompt.zsh`: green path, yellow Git branch,
+`↑N` commits ahead of upstream, and `+` staged, `!` unstaged, `?` untracked
+changes. It needs only Git, uses one status call, and skips submodule worktree
+scans. Keep the checkout at that path, or update the profile's source line.
+
 This folder documents the current GlazeWM + Zebar setup, with Flow Launcher as
 an optional manually installed app launcher. It contains the GlazeWM
 configuration and a self-contained Zebar widget pack. Setup and updates are
@@ -76,11 +93,12 @@ updating its configuration.
 - Local Zebar pack: `%USERPROFILE%\.glzr\zebar\dotfiles-bar\`
 - GlazeWM sign-in shortcut:
   `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\GlazeWM.lnk`
-- One tiled window uses a 40px top gap and no other outer gaps. Multiple
-  windows use 10px inner/edge gaps, with a 40px top gap for the bar.
+- One tiled window overlaps the screen edges by 1px and uses a 39px top gap
+  to cover the native frame's transparent edge below the 40px bar. Multiple
+  windows use 5px inner/edge gaps, with a 40px top gap for the bar.
 - Keybindings use Alt as the main modifier. `Alt+1` through `Alt+9` switch
   workspaces; `Alt+Shift+1` through `Alt+Shift+9` move a window to a workspace.
-- The focused-window glow is disabled; other windows keep their border.
+- The focused window has no configured border; other windows have a grey border.
   Supported Windows 11 windows use square corners.
 - The top bar shows workspaces, tiling direction, network, memory, CPU,
   battery, and date/time. Temperature/weather is not included.
