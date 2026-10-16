@@ -1,14 +1,19 @@
-# Lightweight Git prompt: + staged, ! unstaged, ? untracked.
+# Lightweight Git prompt: ↑N unpushed, + staged, ! unstaged, ? untracked.
 autoload -Uz add-zsh-hook
 
 _dotfiles_git_prompt() {
-  local status_output line branch flags='' staged='' unstaged='' untracked=''
+  local status_output line branch flags='' staged='' unstaged='' untracked='' ahead=''
+  local MATCH
+  local -a match mbegin mend
   local -a status_lines
   typeset -g _dotfiles_git_info=''
 
   status_output=$(GIT_OPTIONAL_LOCKS=0 command git status --porcelain=v1 --branch \
     --untracked-files=normal --ignore-submodules=dirty 2>/dev/null) || return 0
   status_lines=("${(@f)status_output}")
+  if [[ ${status_lines[1]} =~ 'ahead ([0-9]+)' ]]; then
+    ahead=" ↑${match[1]}"
+  fi
   branch=${status_lines[1]#\#\# }
   branch=${branch%%...*}
   branch=${branch#No commits yet on }
@@ -27,7 +32,7 @@ _dotfiles_git_prompt() {
   [[ -n $flags ]] && flags=" $flags"
   # Escape percent signs because zsh interprets them during prompt rendering.
   branch=${branch//\%/%%}
-  _dotfiles_git_info=" %F{yellow}[$branch$flags]%f"
+  _dotfiles_git_info=" %F{yellow}[$branch$ahead$flags]%f"
 }
 
 add-zsh-hook -d precmd _dotfiles_git_prompt
