@@ -1,11 +1,8 @@
 general:
-  # Commands to run when the WM has started. This is useful for running a
-  # script or launching another application.
-  # Example: The below command launches Zebar.
+  # Commands to run when the WM has started. This launches Zebar.
   startup_commands: ['shell-exec zebar']
 
   # Commands to run just before the WM is shutdown.
-  # Example: The below command kills Zebar.
   shutdown_commands: ['shell-exec taskkill /IM zebar.exe /F']
 
   # Commands to run after the WM config is reloaded.
@@ -73,7 +70,7 @@ window_effects:
     # Remove the title bar from the window's frame. Note that this can
     # cause rendering issues for some applications.
     hide_title_bar:
-      enabled: false
+      enabled: true
 
     # Change the corner style of the window's frame.
     # ** Exclusive to Windows 11 due to API limitations.
@@ -95,7 +92,7 @@ window_effects:
       enabled: true
       color: '#a1a1a1'
     hide_title_bar:
-      enabled: false
+      enabled: true
     corner_style:
       enabled: true
       style: 'square'
@@ -262,8 +259,8 @@ keybindings:
   - commands: ['wm-redraw']
     bindings: ['alt+shift+w']
 
-  # Launch PowerShell.
-  - commands: ['shell-exec powershell']
+  # Launch Windows Terminal with its configured default profile.
+  - commands: ['shell-exec wt.exe']
     bindings: ['alt+enter']
 
   # Focus the next/previous active workspace defined in `workspaces` config.

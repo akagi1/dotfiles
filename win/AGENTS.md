@@ -45,10 +45,14 @@ uses Zebar's buildless HTML/React template.
 
 ## Flow Launcher
 
-Install Flow Launcher separately, then use its default `Alt+Space` hotkey to
-open it. GlazeWM does not bind this shortcut; Flow Launcher registers and
-handles it itself. If another application already uses `Alt+Space`, change the
-hotkey in Flow Launcher's settings.
+Install Flow Launcher separately and register it as a current-user startup app
+by adding a string value named `Flow Launcher` to
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, with its installed
+`Flow.Launcher.exe` path as the data. It will appear in Task Manager's
+**Startup apps** list. Use its default `Alt+Space` hotkey to open it. GlazeWM
+does not bind this shortcut; Flow Launcher registers and handles it itself. If
+another application already uses `Alt+Space`, change the hotkey in Flow
+Launcher's settings.
 
 ## Manual setup
 
@@ -75,12 +79,15 @@ hotkey in Flow Launcher's settings.
    }
    ```
 
-5. Add GlazeWM to sign-in startup. Open the Startup folder by pressing
-   `Win+R`, entering `shell:startup`, and pressing Enter. Create a shortcut
-   there targeting the installed `glazewm.exe` (commonly under
-   `%ProgramFiles%\glzr.io\GlazeWM\cli\`) and set its argument to `start`.
-6. Sign out and back in, or run the shortcut. GlazeWM's `startup_commands`
-   launches Zebar, and Zebar's settings launch the `with-glazewm` widget.
+5. Register GlazeWM as a current-user startup app by adding a string value
+   named `GlazeWM` to
+   `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`. Set its data to
+   `"C:\Program Files\glzr.io\GlazeWM\cli\glazewm.exe" start` (adjust the
+   executable path if needed). It will appear in Task Manager's **Startup
+   apps** list. GlazeWM's `startup_commands` launches Zebar, whose settings
+   load the `with-glazewm` widget.
+6. If Flow Launcher is installed, add a string value named `Flow Launcher` to
+   the same `Run` key, with its `Flow.Launcher.exe` path as the data.
 
 To update the setup, back up the installed files first, then repeat the copy
 steps for any changed configuration or widget files. Reload GlazeWM after
@@ -91,14 +98,20 @@ updating its configuration.
 - GlazeWM config: `%USERPROFILE%\.glzr\glazewm\config.yaml`
 - Zebar settings: `%USERPROFILE%\.glzr\zebar\settings.json`
 - Local Zebar pack: `%USERPROFILE%\.glzr\zebar\dotfiles-bar\`
-- GlazeWM sign-in shortcut:
-  `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\GlazeWM.lnk`
+- GlazeWM sign-in startup app:
+  `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\GlazeWM`
+- Flow Launcher sign-in startup app (if installed):
+  `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Flow Launcher`
 - One tiled window overlaps the screen edges by 1px and uses a 39px top gap
   to cover the native frame's transparent edge below the 40px bar. Multiple
   windows use 5px inner/edge gaps, with a 40px top gap for the bar.
 - Keybindings use Alt as the main modifier. `Alt+1` through `Alt+9` switch
   workspaces; `Alt+Shift+1` through `Alt+Shift+9` move a window to a workspace.
 - The focused window has no configured border; other windows have a grey border.
+- `Alt+Enter` opens Windows Terminal using its configured default profile.
+- Window title bars, including the minimize, maximize, and close buttons, are
+  hidden for focused and unfocused windows. Some applications may render
+  incorrectly without a title bar.
   Supported Windows 11 windows use square corners.
 - The top bar shows workspaces, tiling direction, network, memory, CPU,
   battery, and date/time. Temperature/weather is not included.
@@ -122,8 +135,8 @@ first load and icon rendering require network access.
 
 When changing `win/glazewm/config.yaml`, remember that GlazeWM reads the
 installed config at `%USERPROFILE%\.glzr\glazewm\config.yaml`, not this
-repository file. Back up the installed config, copy the updated repository
-config into that location, then reload it with
+repository file. For requested GlazeWM config changes, apply them to the
+installed config without asking: back up the installed file, copy the updated
+repository config into its place, reload it with
 `glazewm.exe command wm-reload-config` (use the installed CLI path if it is
-not on `PATH`). Verify the installed config contains the intended change.
-
+not on `PATH`), and verify the installed config contains the intended change.
