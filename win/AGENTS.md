@@ -17,8 +17,8 @@ The prompt matches `mac/zsh/prompt.zsh`: green path, yellow Git branch,
 changes. It needs only Git, uses one status call, and skips submodule worktree
 scans. Keep the checkout at that path, or update the profile's source line.
 
-This folder documents the current GlazeWM + Zebar setup, with Flow Launcher as
-an optional manually installed app launcher. It contains the GlazeWM
+This folder documents the current GlazeWM + Zebar setup, with rust-launcher as
+the manually installed `Alt+Space` app launcher. It contains the GlazeWM
 configuration and a self-contained Zebar widget pack. Setup and updates are
 done manually; there is no installer script.
 
@@ -33,9 +33,9 @@ done manually; there is no installer script.
 - **Zebar.** Install the Windows build from
   [official releases](https://github.com/glzr-io/zebar/releases) if it was not
   installed with GlazeWM.
-- **Flow Launcher (optional).** Install it from the
-  [official website](https://www.flowlauncher.com/) or its
-  [GitHub releases](https://github.com/Flow-Launcher/Flow.Launcher/releases).
+- **rust-launcher.** Download `rust-launcher.exe` from its
+  [GitHub releases](https://github.com/akagi1/rust-launcher/releases/latest).
+  It is a single portable exe with no installer.
 - **Microsoft Edge WebView2 Runtime.** Zebar uses WebView2. It is commonly
   already present on Windows; if Zebar does not start, install the Evergreen
   Runtime from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/).
@@ -43,21 +43,36 @@ done manually; there is no installer script.
 No Node.js, package manager, or separate theme engine is required. This widget
 uses Zebar's buildless HTML/React template.
 
-## Flow Launcher
+## rust-launcher
 
-Install Flow Launcher separately and register it as a current-user startup app
-by adding a string value named `Flow Launcher` to
-`HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, with its installed
-`Flow.Launcher.exe` path as the data. It will appear in Task Manager's
-**Startup apps** list. Use its default `Alt+Space` hotkey to open it. GlazeWM
-does not bind this shortcut; Flow Launcher registers and handles it itself. If
-another application already uses `Alt+Space`, change the hotkey in Flow
-Launcher's settings.
+rust-launcher opens with `Alt+Space` and ranks recently and frequently launched
+programs first. GlazeWM does not bind this shortcut; rust-launcher registers
+and handles it itself. The hotkey is fixed, so close any other launcher that
+uses `Alt+Space` (Flow Launcher, PowerToys Run) or rust-launcher will show an
+error and exit.
+
+1. Create the folder `%LOCALAPPDATA%\Programs\rust-launcher` and move the
+   downloaded `rust-launcher.exe` into it. Autostart points at this path, so
+   keep the exe there.
+2. Run `rust-launcher.exe` once. An arrow icon appears in the notification
+   area (it may be in the hidden-icons overflow).
+3. Right-click the arrow icon and click **Start with Windows** so it shows a
+   check mark. This registers it as a current-user startup app: a string value
+   named `RustLauncher` in `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`
+   with the quoted exe path as the data. It will appear in Task Manager's
+   **Startup apps** list. You can also add that value by hand instead.
+4. Press `Alt+Space`, type part of a program name, and press Enter.
+
+To update, right-click the tray icon and click **Exit**, replace the exe in the
+same folder, and run it again. Autostart keeps working because the path is
+unchanged. If you previously used Flow Launcher, uninstall it and delete its
+`Flow Launcher` value from the same `Run` key so the two do not compete for
+`Alt+Space`.
 
 ## Manual setup
 
-1. Install GlazeWM and Zebar as described above. Install Flow Launcher
-   separately if you want it.
+1. Install GlazeWM and Zebar as described above. Install rust-launcher as
+   described in the rust-launcher section.
 2. Back up any existing files before replacing them. Copy
    `win\glazewm\config.yaml` to
    `%USERPROFILE%\.glzr\glazewm\config.yaml`.
@@ -86,8 +101,8 @@ Launcher's settings.
    executable path if needed). It will appear in Task Manager's **Startup
    apps** list. GlazeWM's `startup_commands` launches Zebar, whose settings
    load the `with-glazewm` widget.
-6. If Flow Launcher is installed, add a string value named `Flow Launcher` to
-   the same `Run` key, with its `Flow.Launcher.exe` path as the data.
+6. Make sure rust-launcher is registered in the same `Run` key as
+   `RustLauncher` (step 3 of the rust-launcher section).
 
 To update the setup, back up the installed files first, then repeat the copy
 steps for any changed configuration or widget files. Reload GlazeWM after
@@ -100,8 +115,10 @@ updating its configuration.
 - Local Zebar pack: `%USERPROFILE%\.glzr\zebar\dotfiles-bar\`
 - GlazeWM sign-in startup app:
   `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\GlazeWM`
-- Flow Launcher sign-in startup app (if installed):
-  `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Flow Launcher`
+- rust-launcher exe: `%LOCALAPPDATA%\Programs\rust-launcher\rust-launcher.exe`
+- rust-launcher sign-in startup app:
+  `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\RustLauncher`
+- rust-launcher launch history: `%APPDATA%\rust-launcher\history.tsv`
 - One tiled window overlaps the screen edges by 1px and uses a 39px top gap
   to cover the native frame's transparent edge below the 40px bar. Multiple
   windows use 5px inner/edge gaps, with a 40px top gap for the bar.
