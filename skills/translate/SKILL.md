@@ -24,7 +24,7 @@ Column headers are always in Polish, exactly as above.
 
 - **Originał**: the word as written in the source text.
 - **Angielski**: the English equivalent of the word. If the source text is English, this column holds the original English word's meaning in context (a plain English gloss).
-- **Tłumaczenia (po polsku)**: the Polish equivalent **in the form used in the full translation** (the right case, gender, tense, etc.), with the base/dictionary form in parentheses if it differs, e.g. `kota (kot)`, followed by a short explanation of its meaning and use written in Polish, as a Polish dictionary or teacher would put it (e.g. for *męka*: "silne cierpienie fizyczne lub psychiczne"). If a word has no direct equivalent or gets dropped in Polish (e.g. articles "a", "the"), write `—` and say so briefly.
+- **Tłumaczenia (po polsku)**: the Polish equivalent **in the form used in the full translation** (the right case, gender, tense, etc.), with the base/dictionary form in parentheses if it differs, e.g. `kota (kot)`, followed by a short explanation written in Polish, as a Polish dictionary or teacher would put it. **Always start the explanation with what the word means** (e.g. for *męka*: "silne cierpienie fizyczne lub psychiczne"), and only after that give the grammar (part of speech, gender, case, number, tense, etc.) and any extra notes (origin, related words, spelling). If a word has no direct equivalent or gets dropped in Polish (e.g. articles "a", "the"), write `—` and say so briefly.
 
 Prepositions (e.g. "in", "on", "na", "do", "w") don't get their own row. Skip them. Explain them only as part of an idiom or phrase row when they change its meaning.
 
