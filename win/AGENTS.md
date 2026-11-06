@@ -41,9 +41,9 @@ is no installer script.
 
 rustbar draws a 28px bar along the top of every monitor: GlazeWM workspaces on
 the left (click one to focus it), the date and time in the middle, and the
-Wi-Fi network, CPU, memory and battery on the right, refreshed every 5 s. It
-talks to GlazeWM over its IPC socket and reconnects on its own, so it does not
-need to start before or after GlazeWM.
+Wi-Fi network, CPU, GPU, memory and battery on the right, refreshed every
+5 s. It talks to GlazeWM over its IPC socket and reconnects on its own, so it
+does not need to start before or after GlazeWM.
 
 1. Create the folder `%LOCALAPPDATA%\Programs\rustbar` and move the downloaded
    `rustbar.exe` into it. Autostart points at this path, so keep the exe there.
@@ -124,13 +124,42 @@ config again and reload GlazeWM.
   hidden for focused and unfocused windows. Some applications may render
   incorrectly without a title bar.
   Supported Windows 11 windows use square corners.
-- The top bar shows workspaces, date/time, Wi-Fi network, CPU, memory and
-  battery.
+- The top bar shows workspaces, date/time, Wi-Fi network, CPU, GPU, memory
+  and battery.
 
 The `it-agent` ignore rule is preserved from the source machine because it
 prevented auxiliary windows from affecting its layout. It is harmless when
 that process is not installed. Remove that rule from `glazewm\config.yaml` if
 you do not want it on another machine.
+
+## Debloating
+
+Keep sign-in startup lean: only GlazeWM, rustbar and rust-launcher need to
+start with Windows. Review **Task Manager → Startup apps** after installing
+anything, and disable entries that are not needed at sign-in.
+
+Disable rather than delete when an app re-adds its `Run` value on update.
+Disabling is what Task Manager does: it keeps the `Run` value and adds a
+12-byte binary value with the same name under
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run`,
+starting with `03` (`02` re-enables it). The same in PowerShell:
+
+```powershell
+$k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run'
+Set-ItemProperty $k -Name '<Run value name>' -Type Binary -Value ([byte[]](3,0,0,0,0,0,0,0,0,0,0,0))
+```
+
+Disabled on this setup:
+
+- `BingWallpaperApp` and `BingSvc`: Bing Wallpaper and its background
+  helper. Not needed for a static wallpaper.
+
+Removed:
+
+- Zebar: uninstalled, and removed from GlazeWM's `startup_commands`;
+  replaced by rustbar.
+- Flow Launcher: its `Flow.Launcher` `Run` value is deleted so it cannot take
+  `Alt+Space` from rust-launcher; replaced by rust-launcher.
 
 ## Machine-specific Windows settings
 
