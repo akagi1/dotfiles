@@ -17,10 +17,10 @@ The prompt matches `mac/zsh/prompt.zsh`: green path, yellow Git branch,
 changes. It needs only Git, uses one status call, and skips submodule worktree
 scans. Keep the checkout at that path, or update the profile's source line.
 
-This folder documents the current GlazeWM setup, with rustbar as the top bar
-and rust-launcher as the `Alt+Space` app launcher, both manually installed. It
-contains the GlazeWM configuration. Setup and updates are done manually; there
-is no installer script.
+This folder documents the current GlazeWM setup, with two small Rust + Win32
+programs of its own: `rustbar/` (top bar) and `rust-launcher/` (`Alt+Space`
+app launcher). Setup and updates are done manually; there is no installer
+script.
 
 ## Programs and prerequisites
 
@@ -30,62 +30,39 @@ is no installer script.
 - **GlazeWM.** Install from the [official releases](https://github.com/glzr-io/glazewm/releases).
   The GlazeWM README also documents `winget install GlazeWM`. Skip the
   optional bar it offers to install; rustbar is the bar.
-- **rustbar.** Download `rustbar.exe` from its
-  [GitHub releases](https://github.com/akagi1/rustbar/releases/latest).
-  It is a single portable exe with no installer.
-- **rust-launcher.** Download `rust-launcher.exe` from its
-  [GitHub releases](https://github.com/akagi1/rust-launcher/releases/latest).
-  It is a single portable exe with no installer.
+- **Rust.** Install with [rustup](https://rustup.rs/) to build rustbar and
+  rust-launcher.
 
-## rustbar
+## rustbar and rust-launcher
 
-rustbar draws a 28px bar along the top of every monitor: GlazeWM workspaces on
-the left (click one to focus it), the date and time in the middle, and the
-Wi-Fi network, CPU, GPU, memory and battery on the right, refreshed every
-5 s. It talks to GlazeWM over its IPC socket and reconnects on its own, so it
-does not need to start before or after GlazeWM.
+- **rustbar:** a 28px bar on every monitor. GlazeWM workspaces on the left
+  (click to focus), date and time in the middle, Wi-Fi, CPU, memory, GPU and
+  battery on the right, refreshed every 5 s. Reconnects to GlazeWM on its own.
+- **rust-launcher:** `Alt+Space`, type, Enter. Ranks recent and frequent
+  launches first and searches files on demand. The hotkey is fixed; close any
+  other launcher that uses it (Flow Launcher, PowerToys Run).
 
-1. Create the folder `%LOCALAPPDATA%\Programs\rustbar` and move the downloaded
-   `rustbar.exe` into it. Autostart points at this path, so keep the exe there.
-2. Run `rustbar.exe` once. The bar appears at the top of each monitor.
-3. Right-click the bar and click **Start with Windows** so it shows a check
-   mark. This registers it as a current-user startup app: a string value named
-   `RustBar` in `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` with the
-   quoted exe path as the data. You can also add that value by hand instead.
+Build and install both from the repository root:
 
-To update, right-click the bar and click **Exit**, replace the exe in the same
-folder, and run it again.
+```powershell
+foreach ($p in 'rustbar', 'rust-launcher') {
+    cargo build --release --manifest-path "win\$p\Cargo.toml"
+    New-Item -ItemType Directory -Force "$env:LOCALAPPDATA\Programs\$p" | Out-Null
+    Copy-Item "win\$p\target\release\$p.exe" "$env:LOCALAPPDATA\Programs\$p\"
+    Start-Process "$env:LOCALAPPDATA\Programs\$p\$p.exe"
+}
+```
 
-## rust-launcher
+Then right-click the bar, and rust-launcher's tray arrow, and check **Start
+with Windows**. This adds `RustBar` and `RustLauncher` to
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
 
-rust-launcher opens with `Alt+Space` and ranks recently and frequently launched
-programs first. GlazeWM does not bind this shortcut; rust-launcher registers
-and handles it itself. The hotkey is fixed, so close any other launcher that
-uses `Alt+Space` (Flow Launcher, PowerToys Run) or rust-launcher will show an
-error and exit.
-
-1. Create the folder `%LOCALAPPDATA%\Programs\rust-launcher` and move the
-   downloaded `rust-launcher.exe` into it. Autostart points at this path, so
-   keep the exe there.
-2. Run `rust-launcher.exe` once. An arrow icon appears in the notification
-   area (it may be in the hidden-icons overflow).
-3. Right-click the arrow icon and click **Start with Windows** so it shows a
-   check mark. This registers it as a current-user startup app: a string value
-   named `RustLauncher` in `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`
-   with the quoted exe path as the data. It will appear in Task Manager's
-   **Startup apps** list. You can also add that value by hand instead.
-4. Press `Alt+Space`, type part of a program name, and press Enter.
-
-To update, right-click the tray icon and click **Exit**, replace the exe in the
-same folder, and run it again. Autostart keeps working because the path is
-unchanged. If you previously used Flow Launcher, uninstall it and delete its
-`Flow Launcher` value from the same `Run` key so the two do not compete for
-`Alt+Space`.
+To update, click **Exit** in the same menus and run the commands again.
 
 ## Manual setup
 
-1. Install GlazeWM as described above. Install rustbar and rust-launcher as
-   described in their sections.
+1. Install GlazeWM as described above. Build and install rustbar and
+   rust-launcher as described in their section.
 2. Back up any existing file before replacing it. Copy
    `win\glazewm\config.yaml` to
    `%USERPROFILE%\.glzr\glazewm\config.yaml`.
@@ -96,7 +73,7 @@ unchanged. If you previously used Flow Launcher, uninstall it and delete its
    executable path if needed). It will appear in Task Manager's **Startup
    apps** list.
 4. Make sure rustbar and rust-launcher are registered in the same `Run` key as
-   `RustBar` and `RustLauncher` (step 3 of their sections).
+   `RustBar` and `RustLauncher`.
 
 To update the setup, back up the installed config first, then copy the changed
 config again and reload GlazeWM.
