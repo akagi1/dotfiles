@@ -46,14 +46,14 @@ gaps:
 
   # Gap between windows and the screen edge.
   outer_gap:
-    top: '40px'
+    top: '28px'
     right: '5px'
     bottom: '5px'
     left: '5px'
 
   single_window_outer_gap:
     # Cover the native window frame's 1px transparent edge.
-    top: '39px'
+    top: '27px'
     right: '-1px'
     bottom: '-1px'
     left: '-1px'
@@ -138,8 +138,8 @@ workspaces:
 window_rules:
   - commands: ['ignore']
     match:
-      # Ignores any Zebar windows.
-      - window_process: { equals: 'zebar' }
+      # Ignores the rustbar windows.
+      - window_process: { equals: 'rustbar' }
 
       # Ignores auxiliary it-agent windows.
       - window_process: { equals: 'it-agent' }

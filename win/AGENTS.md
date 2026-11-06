@@ -29,7 +29,7 @@ is no installer script.
   it.
 - **GlazeWM.** Install from the [official releases](https://github.com/glzr-io/glazewm/releases).
   The GlazeWM README also documents `winget install GlazeWM`. Skip the
-  optional Zebar install; rustbar replaces it.
+  optional bar it offers to install; rustbar is the bar.
 - **rustbar.** Download `rustbar.exe` from its
   [GitHub releases](https://github.com/akagi1/rustbar/releases/latest).
   It is a single portable exe with no installer.
@@ -39,10 +39,11 @@ is no installer script.
 
 ## rustbar
 
-rustbar draws a 40px bar along the top of every monitor: GlazeWM workspaces on
-the left (click one to focus it), the date and time in the middle, and CPU,
-memory and battery on the right. It talks to GlazeWM over its IPC socket and
-reconnects on its own, so it does not need to start before or after GlazeWM.
+rustbar draws a 28px bar along the top of every monitor: GlazeWM workspaces on
+the left (click one to focus it), the date and time in the middle, and the
+Wi-Fi network, CPU, memory and battery on the right, refreshed every 5 s. It
+talks to GlazeWM over its IPC socket and reconnects on its own, so it does not
+need to start before or after GlazeWM.
 
 1. Create the folder `%LOCALAPPDATA%\Programs\rustbar` and move the downloaded
    `rustbar.exe` into it. Autostart points at this path, so keep the exe there.
@@ -53,9 +54,7 @@ reconnects on its own, so it does not need to start before or after GlazeWM.
    quoted exe path as the data. You can also add that value by hand instead.
 
 To update, right-click the bar and click **Exit**, replace the exe in the same
-folder, and run it again. If you previously used Zebar, remove it from
-GlazeWM's `startup_commands` (this repository's config already does) and
-uninstall it.
+folder, and run it again.
 
 ## rust-launcher
 
@@ -114,9 +113,9 @@ config again and reload GlazeWM.
 - rust-launcher sign-in startup app:
   `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\RustLauncher`
 - rust-launcher launch history: `%APPDATA%\rust-launcher\history.tsv`
-- One tiled window overlaps the screen edges by 1px and uses a 39px top gap
-  to cover the native frame's transparent edge below the 40px bar. Multiple
-  windows use 5px inner/edge gaps, with a 40px top gap for the bar.
+- One tiled window overlaps the screen edges by 1px and uses a 27px top gap
+  to cover the native frame's transparent edge below the 28px bar. Multiple
+  windows use 5px inner/edge gaps, with a 28px top gap for the bar.
 - Keybindings use Alt as the main modifier. `Alt+1` through `Alt+9` switch
   workspaces; `Alt+Shift+1` through `Alt+Shift+9` move a window to a workspace.
 - The focused window has no configured border; other windows have a grey border.
@@ -125,7 +124,8 @@ config again and reload GlazeWM.
   hidden for focused and unfocused windows. Some applications may render
   incorrectly without a title bar.
   Supported Windows 11 windows use square corners.
-- The top bar shows workspaces, date/time, CPU, memory and battery.
+- The top bar shows workspaces, date/time, Wi-Fi network, CPU, memory and
+  battery.
 
 The `it-agent` ignore rule is preserved from the source machine because it
 prevented auxiliary windows from affecting its layout. It is harmless when
