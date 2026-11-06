@@ -1,9 +1,9 @@
 general:
-  # Commands to run when the WM has started. This launches Zebar.
-  startup_commands: ['shell-exec zebar']
+  # Commands to run when the WM has started. rustbar starts on its own.
+  startup_commands: []
 
   # Commands to run just before the WM is shutdown.
-  shutdown_commands: ['shell-exec taskkill /IM zebar.exe /F']
+  shutdown_commands: []
 
   # Commands to run after the WM config is reloaded.
   config_reload_commands: []

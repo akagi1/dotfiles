@@ -17,10 +17,10 @@ The prompt matches `mac/zsh/prompt.zsh`: green path, yellow Git branch,
 changes. It needs only Git, uses one status call, and skips submodule worktree
 scans. Keep the checkout at that path, or update the profile's source line.
 
-This folder documents the current GlazeWM + Zebar setup, with rust-launcher as
-the manually installed `Alt+Space` app launcher. It contains the GlazeWM
-configuration and a self-contained Zebar widget pack. Setup and updates are
-done manually; there is no installer script.
+This folder documents the current GlazeWM setup, with rustbar as the top bar
+and rust-launcher as the `Alt+Space` app launcher, both manually installed. It
+contains the GlazeWM configuration. Setup and updates are done manually; there
+is no installer script.
 
 ## Programs and prerequisites
 
@@ -28,20 +28,34 @@ done manually; there is no installer script.
   Windows 11-only; GlazeWM ignores that effect on versions that do not support
   it.
 - **GlazeWM.** Install from the [official releases](https://github.com/glzr-io/glazewm/releases).
-  The GlazeWM README also documents `winget install GlazeWM`. The GlazeWM
-  installer can optionally install Zebar as well.
-- **Zebar.** Install the Windows build from
-  [official releases](https://github.com/glzr-io/zebar/releases) if it was not
-  installed with GlazeWM.
+  The GlazeWM README also documents `winget install GlazeWM`. Skip the
+  optional Zebar install; rustbar replaces it.
+- **rustbar.** Download `rustbar.exe` from its
+  [GitHub releases](https://github.com/akagi1/rustbar/releases/latest).
+  It is a single portable exe with no installer.
 - **rust-launcher.** Download `rust-launcher.exe` from its
   [GitHub releases](https://github.com/akagi1/rust-launcher/releases/latest).
   It is a single portable exe with no installer.
-- **Microsoft Edge WebView2 Runtime.** Zebar uses WebView2. It is commonly
-  already present on Windows; if Zebar does not start, install the Evergreen
-  Runtime from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/).
 
-No Node.js, package manager, or separate theme engine is required. This widget
-uses Zebar's buildless HTML/React template.
+## rustbar
+
+rustbar draws a 40px bar along the top of every monitor: GlazeWM workspaces on
+the left (click one to focus it), the date and time in the middle, and CPU,
+memory and battery on the right. It talks to GlazeWM over its IPC socket and
+reconnects on its own, so it does not need to start before or after GlazeWM.
+
+1. Create the folder `%LOCALAPPDATA%\Programs\rustbar` and move the downloaded
+   `rustbar.exe` into it. Autostart points at this path, so keep the exe there.
+2. Run `rustbar.exe` once. The bar appears at the top of each monitor.
+3. Right-click the bar and click **Start with Windows** so it shows a check
+   mark. This registers it as a current-user startup app: a string value named
+   `RustBar` in `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` with the
+   quoted exe path as the data. You can also add that value by hand instead.
+
+To update, right-click the bar and click **Exit**, replace the exe in the same
+folder, and run it again. If you previously used Zebar, remove it from
+GlazeWM's `startup_commands` (this repository's config already does) and
+uninstall it.
 
 ## rust-launcher
 
@@ -71,50 +85,31 @@ unchanged. If you previously used Flow Launcher, uninstall it and delete its
 
 ## Manual setup
 
-1. Install GlazeWM and Zebar as described above. Install rust-launcher as
-   described in the rust-launcher section.
-2. Back up any existing files before replacing them. Copy
+1. Install GlazeWM as described above. Install rustbar and rust-launcher as
+   described in their sections.
+2. Back up any existing file before replacing it. Copy
    `win\glazewm\config.yaml` to
    `%USERPROFILE%\.glzr\glazewm\config.yaml`.
-3. Copy the repository's `win\zebar\dotfiles-bar` folder to
-   `%USERPROFILE%\.glzr\zebar\dotfiles-bar`, creating the parent folder if
-   needed.
-4. Create or update `%USERPROFILE%\.glzr\zebar\settings.json` with:
-
-   ```json
-   {
-     "$schema": "https://github.com/glzr-io/zebar/raw/v3.3.1/resources/settings-schema.json",
-     "startupConfigs": [
-       {
-         "pack": "dotfiles-bar",
-         "widget": "with-glazewm",
-         "preset": "default"
-       }
-     ]
-   }
-   ```
-
-5. Register GlazeWM as a current-user startup app by adding a string value
+3. Register GlazeWM as a current-user startup app by adding a string value
    named `GlazeWM` to
    `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`. Set its data to
    `"C:\Program Files\glzr.io\GlazeWM\cli\glazewm.exe" start` (adjust the
    executable path if needed). It will appear in Task Manager's **Startup
-   apps** list. GlazeWM's `startup_commands` launches Zebar, whose settings
-   load the `with-glazewm` widget.
-6. Make sure rust-launcher is registered in the same `Run` key as
-   `RustLauncher` (step 3 of the rust-launcher section).
+   apps** list.
+4. Make sure rustbar and rust-launcher are registered in the same `Run` key as
+   `RustBar` and `RustLauncher` (step 3 of their sections).
 
-To update the setup, back up the installed files first, then repeat the copy
-steps for any changed configuration or widget files. Reload GlazeWM after
-updating its configuration.
+To update the setup, back up the installed config first, then copy the changed
+config again and reload GlazeWM.
 
 ## What is configured
 
 - GlazeWM config: `%USERPROFILE%\.glzr\glazewm\config.yaml`
-- Zebar settings: `%USERPROFILE%\.glzr\zebar\settings.json`
-- Local Zebar pack: `%USERPROFILE%\.glzr\zebar\dotfiles-bar\`
 - GlazeWM sign-in startup app:
   `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\GlazeWM`
+- rustbar exe: `%LOCALAPPDATA%\Programs\rustbar\rustbar.exe`
+- rustbar sign-in startup app:
+  `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\RustBar`
 - rust-launcher exe: `%LOCALAPPDATA%\Programs\rust-launcher\rust-launcher.exe`
 - rust-launcher sign-in startup app:
   `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\RustLauncher`
@@ -130,8 +125,7 @@ updating its configuration.
   hidden for focused and unfocused windows. Some applications may render
   incorrectly without a title bar.
   Supported Windows 11 windows use square corners.
-- The top bar shows workspaces, tiling direction, network, memory, CPU,
-  battery, and date/time. Temperature/weather is not included.
+- The top bar shows workspaces, date/time, CPU, memory and battery.
 
 The `it-agent` ignore rule is preserved from the source machine because it
 prevented auxiliary windows from affecting its layout. It is harmless when
@@ -140,13 +134,10 @@ you do not want it on another machine.
 
 ## Machine-specific Windows settings
 
-Windows taskbar auto-hide is not part of GlazeWM or Zebar configuration. Enable
-it separately under **Settings → Personalization → Taskbar → Taskbar
+Windows taskbar auto-hide is not part of GlazeWM or rustbar configuration.
+Enable it separately under **Settings → Personalization → Taskbar → Taskbar
 behaviors → Automatically hide the taskbar** (Windows 11), or the equivalent
 Taskbar setting on Windows 10.
-
-The bar's HTML loads React/Babel and its icon font from public CDNs, so the
-first load and icon rendering require network access.
 
 # Windows GlazeWM configuration
 
