@@ -18,9 +18,9 @@ changes. It needs only Git, uses one status call, and skips submodule worktree
 scans. Keep the checkout at that path, or update the profile's source line.
 
 This folder documents the current GlazeWM setup, with two small Rust + Win32
-programs of its own: `rustbar/` (top bar) and `rust-launcher/` (`Alt+Space`
-app launcher). Setup and updates are done manually; there is no installer
-script.
+programs of its own in the repository root: `rustbar/` (top bar) and
+`rust-launcher/` (`Alt+Space` app launcher). Setup and updates are done
+manually; there is no installer script.
 
 ## Programs and prerequisites
 
@@ -46,9 +46,9 @@ Build and install both from the repository root:
 
 ```powershell
 foreach ($p in 'rustbar', 'rust-launcher') {
-    cargo build --release --manifest-path "win\$p\Cargo.toml"
+    cargo build --release --manifest-path "$p\Cargo.toml"
     New-Item -ItemType Directory -Force "$env:LOCALAPPDATA\Programs\$p" | Out-Null
-    Copy-Item "win\$p\target\release\$p.exe" "$env:LOCALAPPDATA\Programs\$p\"
+    Copy-Item "$p\target\release\$p.exe" "$env:LOCALAPPDATA\Programs\$p\"
     Start-Process "$env:LOCALAPPDATA\Programs\$p\$p.exe"
 }
 ```
