@@ -1,11 +1,14 @@
 //! Finds launchable programs: Start Menu / Desktop shortcuts plus Store
-//! (UWP) apps reported by `Get-StartApps`, plus files opened before.
+//! (UWP) apps reported by `Get-StartApps`, plus files opened before and the
+//! built-in commands.
 
 use std::collections::HashSet;
 use std::fs;
 use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+
+use crate::commands::{self, COMMANDS};
 
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 const EXTENSIONS: &[&str] = &["lnk", "exe", "url", "appref-ms"];
@@ -17,6 +20,8 @@ pub enum Target {
     Shortcut(String),
     /// An AppUserModelID, launched through `shell:AppsFolder`.
     App(String),
+    /// A built-in command.
+    Command(&'static commands::Command),
 }
 
 #[derive(Clone, Debug)]
@@ -33,14 +38,16 @@ impl Item {
         let key = match &target {
             Target::Shortcut(p) => p.to_lowercase(),
             Target::App(id) => format!("app:{id}"),
+            Target::Command(c) => c.key(),
         };
         Item { name_lower: name.to_lowercase(), name, key, target }
     }
 
-    pub fn subtitle(&self) -> &str {
+    pub fn subtitle(&self) -> String {
         match &self.target {
-            Target::Shortcut(p) => p,
-            Target::App(_) => "App",
+            Target::Shortcut(p) => p.clone(),
+            Target::App(_) => "App".to_string(),
+            Target::Command(c) => c.subtitle(),
         }
     }
 }
@@ -142,10 +149,11 @@ pub fn recent_files(keys: &[String], shortcuts: &[Item]) -> Vec<Item> {
         .collect()
 }
 
-/// Shortcuts win over apps with the same name; recent files never collide
-/// with either, since they exclude shortcut paths.
+/// Commands win over shortcuts, and shortcuts over apps, with the same name;
+/// recent files never collide with any, since they exclude shortcut paths.
 pub fn merge(shortcuts: &[Item], apps: &[Item], recent: &[Item]) -> Vec<Item> {
-    let mut items = dedupe(shortcuts.iter().chain(apps).cloned().collect());
+    let commands = COMMANDS.iter().map(|c| Item::new(c.name.to_string(), Target::Command(c)));
+    let mut items = dedupe(commands.chain(shortcuts.iter().chain(apps).cloned()).collect());
     items.extend(recent.iter().cloned());
     items
 }

@@ -3,6 +3,7 @@
 //! A lightweight Alt+Space program launcher: a borderless Win32 popup with a
 //! search box and an owner-drawn result list, plus a tray icon.
 
+mod commands;
 mod files;
 mod history;
 mod index;
@@ -28,6 +29,7 @@ use windows_sys::Win32::UI::Input::KeyboardAndMouse::*;
 use windows_sys::Win32::UI::Shell::*;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 
+use commands::Action;
 use files::Hit;
 use history::History;
 use index::{Item, Target};
@@ -156,6 +158,14 @@ fn main() {
         CreateMutexW(null(), 0, wide("rust-launcher-single-instance").as_ptr());
         if GetLastError() == ERROR_ALREADY_EXISTS {
             return;
+        }
+        // Started from a Claude Code session, the launcher would pass that
+        // session's markers on to everything it runs (e.g. `cc`).
+        for (key, _) in std::env::vars_os() {
+            let k = key.to_string_lossy().to_ascii_uppercase();
+            if k.starts_with("CLAUDE_CODE") || k == "CLAUDECODE" {
+                std::env::remove_var(&key);
+            }
         }
         SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
         CoInitializeEx(null(), COINIT_APARTMENTTHREADED as _);
@@ -541,6 +551,18 @@ fn run_target(target: &Target, mode: Mode) {
             shell_execute(None, "explorer.exe", Some(&format!("/select,\"{path}\"")))
         }
         (Target::App(id), _) => shell_execute(None, "explorer.exe", Some(&format!(r"shell:AppsFolder\{id}"))),
+        (Target::Command(c), mode) => {
+            let verb = matches!(mode, Mode::Admin).then_some("runas");
+            match c.action {
+                Action::Open(target) => shell_execute(verb, target, None),
+                // Without -d the terminal inherits the launcher's directory
+                // (System32 when elevated or started at logon).
+                Action::Terminal(cmd) => {
+                    let home = std::env::var("USERPROFILE").unwrap_or_default();
+                    shell_execute(verb, "wt.exe", Some(&format!("-d \"{home}\" {cmd}")))
+                }
+            }
+        }
     };
 }
 
@@ -640,6 +662,7 @@ fn icon_for(icons: &mut HashMap<String, HICON>, item: &Item) -> HICON {
             Target::Shortcut(path) => {
                 SHGetFileInfoW(wide(path).as_ptr(), 0, &mut sfi, size_of::<SHFILEINFOW>() as u32, flags);
             }
+            Target::Command(c) => return c.icon(s(32)),
             Target::App(id) => {
                 let mut pidl = null_mut();
                 let name = wide(&format!(r"shell:AppsFolder\{id}"));
@@ -661,7 +684,7 @@ unsafe fn draw_item(ui: &Ui, dis: &DRAWITEMSTRUCT) {
         let mut st = st.try_borrow_mut().ok()?;
         let item = st.results.get(dis.itemID as usize)?.clone();
         let icon = icon_for(&mut st.icons, &item);
-        Some((item.name.clone(), item.subtitle().to_string(), icon))
+        Some((item.name.clone(), item.subtitle(), icon))
     }) else {
         return;
     };

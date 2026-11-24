@@ -36,11 +36,30 @@ manually; there is no installer script.
 ## rustbar and rust-launcher
 
 - **rustbar:** a 28px bar on every monitor. GlazeWM workspaces on the left
-  (click to focus), date and time in the middle, Wi-Fi, CPU, memory, GPU and
-  battery on the right, refreshed every 5 s. Reconnects to GlazeWM on its own.
+  (click to focus); on the right, refreshed every 5 s:
+  - Wi-Fi standard, network and speed, e.g. `wifi 6E HomeNet ↓1.2M ↑40K`
+  - CPU cores, threads and usage, e.g. `Ryzen 5 3600 6C/12T 12%`
+  - memory type, speed, used and installed, e.g. `DDR4-3200 12.0/16GB`
+  - swap (page file) used and size, e.g. `swap 0.1/4GB`
+  - GPU cores, memory type, usage and dedicated memory, e.g.
+    `RTX 4060 3072c GDDR6 99% 4.2/8GB`
+  - system drive bus, rated read speed, used and size, e.g.
+    `NVMe 3.3GB/s 548/855GB`
+  - battery, then the date and time
+
+  GPU cores and memory type, and the drive's read speed, come from the `GPUS`
+  and `DISKS` tables in `rustbar/src/info.rs`, as Windows does not report
+  them; hardware missing from them shows `unknown model`, so add a row for it. Reconnects to GlazeWM on its
+  own.
 - **rust-launcher:** `Alt+Space`, type, Enter. Ranks recent and frequent
   launches first and searches files on demand. The hotkey is fixed; close any
   other launcher that uses it (Flow Launcher, PowerToys Run).
+
+  Built-in commands come first when their keyword is typed exactly: `y` or
+  `yt` opens YouTube, `cc` or `claude code` runs Claude Code in Windows
+  Terminal. Add one as a row in `COMMANDS` in `rust-launcher/src/commands.rs`
+  with an `.ico` in `rust-launcher/assets/commands/` (`make-icons.ps1` there
+  draws the bundled ones), then rebuild.
 
 Build and install both from the repository root:
 
@@ -58,6 +77,8 @@ with Windows**. This adds `RustBar` and `RustLauncher` to
 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
 
 To update, click **Exit** in the same menus and run the commands again.
+Every code change needs this rebuild, install and restart: the running copy
+is the exe in `%LOCALAPPDATA%\Programs\`, so building alone changes nothing.
 
 ## Manual setup
 

@@ -4,13 +4,17 @@ use std::collections::HashSet;
 
 use crate::files::Hit;
 use crate::history::History;
-use crate::index::Item;
+use crate::index::{Item, Target};
 
 /// Maximum number of results kept after ranking.
 pub const MAX_RESULTS: usize = 50;
 
 /// Highest score a fuzzy (in-order letters) match can get.
 const FUZZY_MAX: i64 = 300;
+
+/// Score of a command whose alias or name is typed exactly: above any match
+/// plus frecency, so keywords always do the same thing.
+const KEYWORD: i64 = 100_000;
 
 /// Scores how well `query` matches `name`. Both must already be lowercase.
 /// Returns `None` when it doesn't match at all.
@@ -60,6 +64,16 @@ fn subsequence_score(name: &str, query: &str) -> Option<i64> {
     Some((FUZZY_MAX - gaps * 10).max(50))
 }
 
+/// `match_score` for an item, where commands also match their aliases.
+fn item_score(item: &Item, query: &str) -> Option<i64> {
+    if let Target::Command(c) = &item.target {
+        if item.name_lower == query || c.aliases.contains(&query) {
+            return Some(KEYWORD);
+        }
+    }
+    match_score(&item.name_lower, query)
+}
+
 /// Like `match_score`, but fuzzy matches don't count: over thousands of
 /// file names they are mostly noise.
 pub fn file_score(name: &str, query: &str) -> Option<i64> {
@@ -80,7 +94,7 @@ pub fn rank<'a>(items: &'a [Item], files: &'a [Hit], query: &str, history: &Hist
             if query.is_empty() {
                 return (frecency > 0).then_some((frecency, item));
             }
-            let m = match_score(&item.name_lower, &query)?;
+            let m = item_score(item, &query)?;
             Some((m + frecency, item))
         })
         .collect();
@@ -137,6 +151,17 @@ mod tests {
         let mut history = History::empty();
         history.record(&items[2].key, 10);
         assert_eq!(names(rank(&items, &[], "", &history, 20)), ["C"]);
+    }
+
+    #[test]
+    fn alias_beats_frecent_prefix_match() {
+        let youtube = crate::commands::COMMANDS.iter().find(|c| c.name == "YouTube").unwrap();
+        let items = vec![item("Yarn"), Item::new(youtube.name.to_string(), Target::Command(youtube))];
+        let mut history = History::empty();
+        for t in 0..10 {
+            history.record(&items[0].key, t);
+        }
+        assert_eq!(names(rank(&items, &[], "y", &history, 10)), ["YouTube", "Yarn"]);
     }
 
     #[test]

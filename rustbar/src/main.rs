@@ -1,8 +1,8 @@
 #![windows_subsystem = "windows"]
 
-//! A minimal top bar for GlazeWM: workspaces on the left, the date in the
-//! middle and CPU, memory and battery on the right. One plain GDI window per
-//! monitor, plus a hidden window that owns the timer and the menu.
+//! A minimal top bar for GlazeWM: workspaces on the left, and the hardware,
+//! its numbers and the date on the right. One plain GDI window per monitor,
+//! plus a hidden window that owns the timer and the menu.
 
 mod glazewm;
 mod info;
@@ -22,7 +22,7 @@ use windows_sys::Win32::UI::HiDpi::*;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 
 use glazewm::Workspace;
-use info::{Info, Names, Sampler};
+use info::{Info, Names, Sampler, Wifi};
 
 const WM_GLAZEWM: u32 = WM_APP + 1;
 const WM_REBUILD: u32 = WM_APP + 2;
@@ -61,7 +61,7 @@ const WS_FOCUSED: COLORREF = rgb(40, 58, 137);
 const TEXT: COLORREF = rgb(185, 185, 192);
 const SUBTEXT: COLORREF = rgb(115, 130, 175);
 
-/// CPU and GPU names, read on first paint.
+/// Hardware names, read on first paint.
 static NAMES: LazyLock<Names> = LazyLock::new(info::names);
 
 thread_local! {
@@ -343,25 +343,46 @@ unsafe fn paint(hwnd: HWND) {
     }
 
     INFO.with_borrow(|info| {
-        draw_text(mem, &info.date, &mut rc.clone(), TEXT, DT_CENTER);
-
         // Label/value pairs, laid out from the right edge leftwards.
         let mut items = Vec::new();
         if let Some(wifi) = &info.wifi {
-            items.push(("wifi", wifi.clone().unwrap_or_else(|| "off".into())));
+            let label = match wifi {
+                Some(Wifi { standard: Some(standard), .. }) => format!("wifi {standard}"),
+                _ => "wifi".into(),
+            };
+            let mut value = wifi.as_ref().map_or("off", |w| w.name.as_str()).to_string();
+            if let Some((down, up)) = info.net {
+                value += &format!(" ↓{} ↑{}", rate(down), rate(up));
+            }
+            items.push((label, value));
         }
-        items.push((NAMES.cpu.as_str(), format!("{}%", info.cpu)));
-        items.push(("mem", format!("{}%", info.mem)));
+        items.push((NAMES.cpu.clone(), format!("{}%", info.cpu)));
+        let (used, total) = info.mem;
+        items.push((NAMES.mem.clone(), format!("{}.{}/{total}GB", used / 10, used % 10)));
+        if let Some((used, total)) = info.swap {
+            items.push(("swap".into(), format!("{}.{}/{total}GB", used / 10, used % 10)));
+        }
         if let Some(gpu) = info.gpu {
-            items.push((NAMES.gpu.as_str(), format!("{gpu}%")));
+            let mut value = format!("{gpu}%");
+            if let (Some(used), Some(total)) = (info.vram, NAMES.vram) {
+                value += &format!(" {}.{}/{total}GB", used / 10, used % 10);
+            }
+            items.push((NAMES.gpu.clone(), value));
+        }
+        if let Some((used, total)) = info.disk {
+            items.push((NAMES.disk.clone(), format!("{used}/{total}GB")));
         }
         if let Some((percent, charging)) = info.battery {
-            items.push(("bat", format!("{percent}%{}", if charging { "+" } else { "" })));
+            items.push(("bat".into(), format!("{percent}%{}", if charging { "+" } else { "" })));
         }
+        items.push((String::new(), info.date.clone()));
         let space = text_width(mem, &[b' ' as u16]);
         let mut x = rc.right - s(EDGE, dpi);
         for (label, value) in items.iter().rev() {
-            for (text, color) in [(value.as_str(), TEXT), (*label, SUBTEXT)] {
+            for (text, color) in [(value.as_str(), TEXT), (label.as_str(), SUBTEXT)] {
+                if text.is_empty() {
+                    continue;
+                }
                 let w = text_width(mem, &text.encode_utf16().collect::<Vec<_>>());
                 draw_text(mem, text, &mut RECT { left: x - w, right: x, ..rc }, color, DT_LEFT);
                 x -= w + space;
@@ -376,6 +397,16 @@ unsafe fn paint(hwnd: HWND) {
     DeleteObject(bmp);
     DeleteDC(mem);
     EndPaint(hwnd, &ps);
+}
+
+/// Bytes per second, e.g. `40K` or `1.2M`.
+fn rate(bytes: u64) -> String {
+    const MIB: f64 = (1 << 20) as f64;
+    match bytes as f64 / MIB {
+        mb if mb < 1.0 => format!("{}K", bytes >> 10),
+        mb if mb < 10.0 => format!("{mb:.1}M"),
+        mb => format!("{mb:.0}M"),
+    }
 }
 
 unsafe fn menu() {

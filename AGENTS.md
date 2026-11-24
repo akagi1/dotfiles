@@ -6,7 +6,10 @@ Platform-specific setup and configuration live in separate folders:
 - [`mac/`](mac/AGENTS.md): yabai, skhd and SketchyBar on macOS.
 - `nix/`: placeholder for Linux/Nix dotfiles.
 - `rustbar/`, `rust-launcher/`: Rust + Win32 top bar and launcher, built
-  during Windows setup (see [`win/`](win/AGENTS.md)).
+  during Windows setup (see [`win/`](win/AGENTS.md)). After any code change
+  to either, rebuild, install and restart it without being asked (commands
+  in [`win/AGENTS.md`](win/AGENTS.md)); the running copy is the installed exe,
+  so a build alone changes nothing.
 - [`skills/`](skills/AGENTS.md): Claude Code skills, symlinked into
   `~/.claude/skills`.
 

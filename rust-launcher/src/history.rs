@@ -93,9 +93,9 @@ impl History {
         }
     }
 
-    /// Keys of launched paths: everything but Store apps.
+    /// Keys of launched paths: everything but Store apps and commands.
     pub fn path_keys(&self) -> Vec<String> {
-        self.stamps.keys().filter(|k| !k.starts_with("app:")).cloned().collect()
+        self.stamps.keys().filter(|k| !k.starts_with("app:") && !k.starts_with("cmd:")).cloned().collect()
     }
 
     pub fn score(&self, key: &str, now: u64) -> i64 {

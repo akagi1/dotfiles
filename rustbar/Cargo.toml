@@ -7,11 +7,17 @@ description = "A minimal GlazeWM top bar for Windows"
 [dependencies]
 serde_json = "1"
 windows-sys = { version = "0.59", features = [
+    "Wdk_System_SystemInformation",
     "Win32_Foundation",
     "Win32_Globalization",
     "Win32_Graphics_Gdi",
+    "Win32_NetworkManagement_IpHelper",
+    "Win32_NetworkManagement_Ndis",
     "Win32_NetworkManagement_WiFi",
     "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_System_Ioctl",
     "Win32_System_LibraryLoader",
     "Win32_System_Performance",
     "Win32_System_Power",
